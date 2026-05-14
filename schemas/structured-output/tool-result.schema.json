@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "XcodeBazelMCPToolResult",
+  "type": "object",
+  "properties": {
+    "ok": { "type": "boolean" },
+    "command": { "type": "string" },
+    "exitCode": { "type": "number" },
+    "durationMs": { "type": "number" },
+    "output": { "type": "string" }
+  },
+  "required": ["ok", "output"]
+}

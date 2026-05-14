@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "XcodeBazelMCP",
+  "description": "MCP server and CLI for Bazel-based iOS build and test workflows.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/maatheusgois-dd/XcodeBazelMCP",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registry": "npm",
+      "name": "xcodebazelmcp",
+      "version": "0.1.0",
+      "runtime_hint": "node"
+    }
+  ]
+}

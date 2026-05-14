@@ -1,0 +1,160 @@
+import { describe, expect, it } from 'vitest';
+import { spawn } from 'node:child_process';
+import { resolve } from 'node:path';
+
+const CLI = resolve(import.meta.dirname, '..', 'cli.ts');
+
+function sendMcpRequest(
+  messages: Array<Record<string, unknown>>,
+  timeoutMs = 10_000,
+): Promise<string[]> {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn('npx', ['tsx', CLI, 'mcp'], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, NODE_NO_WARNINGS: '1' },
+    });
+
+    let stdout = '';
+    const timer = setTimeout(() => {
+      child.kill();
+      resolvePromise(stdout.split('\n').filter(Boolean));
+    }, timeoutMs);
+
+    child.stdout.on('data', (chunk: Buffer) => {
+      stdout += chunk.toString();
+    });
+
+    child.on('close', () => {
+      clearTimeout(timer);
+      resolvePromise(stdout.split('\n').filter(Boolean));
+    });
+
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+
+    for (const msg of messages) {
+      child.stdin.write(JSON.stringify(msg) + '\n');
+    }
+
+    setTimeout(() => child.stdin.end(), 500);
+  });
+}
+
+describe('MCP server protocol', () => {
+  it('responds to initialize with server info and capabilities', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+    ]);
+
+    expect(lines.length).toBeGreaterThanOrEqual(1);
+    const resp = JSON.parse(lines[0]);
+    expect(resp.jsonrpc).toBe('2.0');
+    expect(resp.id).toBe(1);
+    expect(resp.result.serverInfo.name).toBe('XcodeBazelMCP');
+    expect(resp.result.capabilities.tools).toBeDefined();
+    expect(resp.result.capabilities.resources).toBeDefined();
+    expect(resp.result.protocolVersion).toBe('2024-11-05');
+  });
+
+  it('responds to ping', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'ping' },
+    ]);
+
+    const pingResp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(pingResp).toBeDefined();
+    expect(pingResp.result).toEqual({});
+  });
+
+  it('lists default workflow tools via tools/list (smart defaults)', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'tools/list' },
+    ]);
+
+    const toolsResp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(toolsResp).toBeDefined();
+    expect(toolsResp.result.tools).toHaveLength(34);
+    const names = toolsResp.result.tools.map((t: { name: string }) => t.name);
+    expect(names).toContain('bazel_ios_build');
+    expect(names).toContain('bazel_ios_test');
+    expect(names).toContain('bazel_list_workflows');
+    expect(names).toContain('bazel_toggle_workflow');
+    expect(names).not.toContain('bazel_tvos_build');
+    expect(names).not.toContain('bazel_ios_tap');
+  });
+
+  it('compact schemas strip property descriptions', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'tools/list' },
+    ]);
+
+    const toolsResp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    const buildTool = toolsResp.result.tools.find((t: { name: string }) => t.name === 'bazel_ios_build');
+    expect(buildTool).toBeDefined();
+    expect(buildTool.description).toBeTruthy();
+    const targetProp = (buildTool.inputSchema.properties as Record<string, Record<string, unknown>>).target;
+    expect(targetProp.type).toBe('string');
+    expect(targetProp.description).toBeUndefined();
+  });
+
+  it('lists resources including last-command', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'resources/list' },
+    ]);
+
+    const resp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(resp.result.resources).toHaveLength(2);
+    const uris = resp.result.resources.map((r: { uri: string }) => r.uri);
+    expect(uris).toContain('xcodebazel://last-command');
+    expect(uris).toContain('xcodebazel://session-status');
+  });
+
+  it('reads last-command resource (no command yet)', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'resources/read', params: { uri: 'xcodebazel://last-command' } },
+    ]);
+
+    const resp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(resp.result.contents[0].text).toBe('No command has run yet.');
+  });
+
+  it('returns error for unknown method', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 99, method: 'nonexistent/method' },
+    ]);
+
+    const resp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 99);
+    expect(resp.error).toBeDefined();
+    expect(resp.error.code).toBe(-32601);
+  });
+
+  it('calls show_defaults tool successfully', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'bazel_ios_show_defaults', arguments: {} } },
+    ]);
+
+    const resp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(resp.result).toBeDefined();
+    expect(resp.result.content).toBeDefined();
+    expect(resp.result.content[0].type).toBe('text');
+  });
+
+  it('returns prompts/list as empty', async () => {
+    const lines = await sendMcpRequest([
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05' } },
+      { jsonrpc: '2.0', id: 2, method: 'prompts/list' },
+    ]);
+
+    const resp = lines.map((l) => JSON.parse(l)).find((r) => r.id === 2);
+    expect(resp.result.prompts).toEqual([]);
+  });
+});

@@ -1,0 +1,50 @@
+load("@build_bazel_rules_apple//apple:macos.bzl", "macos_application", "macos_unit_test")
+load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+load("//tools:shared.bzl", "macos_app_info", "versions")
+
+# Version
+
+apple_bundle_version(
+    name = "Version",
+    build_version = "0.0.1",
+    short_version_string = "1.0",
+)
+
+# Code
+
+swift_library(
+    name = "mac.library",
+    srcs = glob(["source/**/*.swift"]),
+    module_name = "MacApp",
+)
+
+# Packaging
+
+macos_application(
+    name = "mac",
+    bundle_id = macos_app_info.bundle_id,
+    bundle_name = macos_app_info.bundle_name,
+    infoplists = [":Info.plist"],
+    minimum_os_version = versions.minimum_macos_version,
+    version = ":Version",
+    visibility = ["//:__subpackages__"],
+    deps = [":mac.library"],
+)
+
+# Tests
+
+swift_library(
+    name = "MacTestsLib",
+    testonly = True,
+    srcs = ["Tests/MacTests.swift"],
+    module_name = "MacTests",
+    deps = [":mac.library"],
+)
+
+macos_unit_test(
+    name = "MacTests",
+    minimum_os_version = versions.minimum_macos_version,
+    visibility = ["//:__subpackages__"],
+    deps = [":MacTestsLib"],
+)

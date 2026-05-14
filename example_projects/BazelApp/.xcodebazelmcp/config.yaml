@@ -1,0 +1,19 @@
+bazelPath: bazel
+defaultPlatform: simulator
+
+profiles:
+  app:
+    defaultTarget: //app:app
+    defaultSimulatorName: iPhone 16 Pro
+    defaultBuildMode: debug
+  models:
+    defaultTarget: //modules/Models:ModelsLib
+    defaultBuildMode: none
+  mac:
+    defaultTarget: //mac:mac
+    defaultPlatform: macos
+    defaultBuildMode: debug
+  mac-tests:
+    defaultTarget: //mac:MacTests
+    defaultPlatform: macos
+    defaultBuildMode: debug

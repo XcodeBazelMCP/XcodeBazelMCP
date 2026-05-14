@@ -1,0 +1,8 @@
+{
+  "name": "XcodeBazelMCP",
+  "command": "node",
+  "args": ["dist/cli.js", "mcp"],
+  "env": {
+    "BAZEL_IOS_WORKSPACE": "/path/to/your/ios-workspace"
+  }
+}

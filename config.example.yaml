@@ -1,0 +1,6 @@
+workspacePath: /path/to/your/ios-workspace
+bazelPath: /opt/homebrew/bin/bazel
+defaultSimulatorName: iPhone 16 Pro
+defaultPlatform: simulator
+defaultTestOutput: errors
+# enabledWorkflows: build, test, simulator, app_lifecycle, session

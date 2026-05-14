@@ -1,0 +1,55 @@
+{
+  "name": "xcodebazelmcp",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server and CLI for Bazel-based iOS build and test workflows.",
+  "type": "module",
+  "bin": {
+    "xcodebazelmcp": "./dist/cli.js",
+    "xcodebazelmcp-doctor": "./dist/doctor-cli.js"
+  },
+  "files": [
+    "dist",
+    "manifests",
+    "schemas",
+    "skills",
+    "README.md",
+    "server.json",
+    "config.example.yaml"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev:mcp": "tsx src/cli.ts mcp",
+    "doctor": "tsx src/doctor-cli.ts",
+    "tools": "tsx src/cli.ts tools",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "vitest --run",
+    "test:unit": "vitest --run --config vitest.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "bazel",
+    "ios",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "xcode",
+    "sourcekit-bazel-bsp"
+  ],
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/node": "^20.19.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.25.0",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.0",
+    "vitest": "^3.1.2"
+  }
+}
