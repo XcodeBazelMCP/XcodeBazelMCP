@@ -1,6 +1,33 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { stringOrUndefined, numberOrUndefined, prependWarning, applyDefaults } from './helpers.js';
+import { beforeEach, describe, it, expect, afterEach, vi } from 'vitest';
+import { runCommand } from '../utils/process.js';
+import {
+  stringOrUndefined,
+  numberOrUndefined,
+  prependWarning,
+  applyDefaults,
+  nextLogCaptureId,
+  nextVideoRecordingId,
+  resolveSimulatorFromArgs,
+  logCaptureCounter,
+  videoRecordingCounter,
+} from './helpers.js';
 import { clearDefaults, setDefaults } from '../runtime/config.js';
+
+vi.mock('../utils/process.js', () => ({
+  runCommand: vi.fn(),
+}));
+
+vi.mock('../core/simulators.js', () => ({
+  resolveSimulator: vi.fn(),
+}));
+
+const mockRunCommand = vi.mocked(runCommand);
+const { resolveSimulator } = await import('../core/simulators.js');
+const mockResolveSimulator = vi.mocked(resolveSimulator);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('stringOrUndefined', () => {
   it('returns string for string input', () => expect(stringOrUndefined('hello')).toBe('hello'));
@@ -81,5 +108,86 @@ describe('applyDefaults', () => {
       buildMode: 'debug',
       platform: 'simulator',
     });
+  });
+});
+
+describe('nextLogCaptureId', () => {
+  it('increments counter each call', () => {
+    const id1 = nextLogCaptureId();
+    const id2 = nextLogCaptureId();
+    const id3 = nextLogCaptureId();
+    expect(id2).toBe(id1 + 1);
+    expect(id3).toBe(id2 + 1);
+  });
+
+  it('returns positive integers', () => {
+    const id = nextLogCaptureId();
+    expect(id).toBeGreaterThan(0);
+    expect(Number.isInteger(id)).toBe(true);
+  });
+});
+
+describe('nextVideoRecordingId', () => {
+  it('increments counter each call', () => {
+    const id1 = nextVideoRecordingId();
+    const id2 = nextVideoRecordingId();
+    const id3 = nextVideoRecordingId();
+    expect(id2).toBe(id1 + 1);
+    expect(id3).toBe(id2 + 1);
+  });
+
+  it('returns positive integers', () => {
+    const id = nextVideoRecordingId();
+    expect(id).toBeGreaterThan(0);
+    expect(Number.isInteger(id)).toBe(true);
+  });
+});
+
+describe('resolveSimulatorFromArgs', () => {
+  it('calls resolveSimulator with simulatorId', async () => {
+    const mockDevice = { name: 'iPhone 15', udid: 'ABC-123', runtime: 'iOS 17.0', state: 'Booted', isAvailable: true };
+    mockResolveSimulator.mockResolvedValue({ device: mockDevice });
+
+    const result = await resolveSimulatorFromArgs({ simulatorId: 'ABC-123' });
+
+    expect(mockResolveSimulator).toHaveBeenCalledWith({ simulatorId: 'ABC-123', simulatorName: undefined });
+    expect(result.sim).toEqual(mockDevice);
+  });
+
+  it('calls resolveSimulator with simulatorName', async () => {
+    const mockDevice = { name: 'iPhone 15', udid: 'ABC-123', runtime: 'iOS 17.0', state: 'Booted', isAvailable: true };
+    mockResolveSimulator.mockResolvedValue({ device: mockDevice });
+
+    const result = await resolveSimulatorFromArgs({ simulatorName: 'iPhone 15' });
+
+    expect(mockResolveSimulator).toHaveBeenCalledWith({ simulatorId: undefined, simulatorName: 'iPhone 15' });
+    expect(result.sim).toEqual(mockDevice);
+  });
+
+  it('passes warning from resolveSimulator', async () => {
+    const mockDevice = { name: 'iPhone 15', udid: 'ABC-123', runtime: 'iOS 17.0', state: 'Booted', isAvailable: true };
+    mockResolveSimulator.mockResolvedValue({ device: mockDevice, warning: 'Multiple devices booted' });
+
+    const result = await resolveSimulatorFromArgs({});
+
+    expect(result.warning).toBe('Multiple devices booted');
+  });
+
+  it('filters out non-string simulatorId values', async () => {
+    const mockDevice = { name: 'iPhone 15', udid: 'ABC-123', runtime: 'iOS 17.0', state: 'Booted', isAvailable: true };
+    mockResolveSimulator.mockResolvedValue({ device: mockDevice });
+
+    await resolveSimulatorFromArgs({ simulatorId: 123 });
+
+    expect(mockResolveSimulator).toHaveBeenCalledWith({ simulatorId: undefined, simulatorName: undefined });
+  });
+
+  it('filters out non-string simulatorName values', async () => {
+    const mockDevice = { name: 'iPhone 15', udid: 'ABC-123', runtime: 'iOS 17.0', state: 'Booted', isAvailable: true };
+    mockResolveSimulator.mockResolvedValue({ device: mockDevice });
+
+    await resolveSimulatorFromArgs({ simulatorName: true });
+
+    expect(mockResolveSimulator).toHaveBeenCalledWith({ simulatorId: undefined, simulatorName: undefined });
   });
 });
