@@ -2,20 +2,24 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| latest  | :white_check_mark: |
+| < 0.1.0 | :x:                |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security vulnerability in XcodeBazelMCP, please report it responsibly:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+1. **Do not** open a public GitHub issue.
+2. Email **maatheusgois@gmail.com** with a description of the vulnerability, steps to reproduce, and any relevant logs or screenshots.
+3. You can expect an initial response within **48 hours**.
+4. We will work with you to understand the issue and coordinate a fix before any public disclosure.
+
+## Scope
+
+XcodeBazelMCP is a local CLI and MCP server that spawns Bazel and Xcode toolchain processes on your machine. It does not handle authentication, network services, or user data. Security concerns are primarily around:
+
+- Command injection via tool arguments
+- Unintended file system access
+- Dependency supply chain risks
