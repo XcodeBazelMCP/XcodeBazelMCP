@@ -1,4 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import type { CommandResult } from '../types/index.js';
+import { runCommand, runCommandStreaming } from '../utils/process.js';
 import {
   asStringArray,
   buildCommandArgs,
@@ -9,6 +14,9 @@ import {
   requireLabel,
   sanitizeQueryExpression,
   simulatorArgs,
+  runBazel,
+  runBazelStreaming,
+  getLastCommand,
 } from './bazel.js';
 import {
   parseConfigYaml,
@@ -18,6 +26,43 @@ import {
   setWorkspace,
   clearDefaults,
 } from '../runtime/config.js';
+
+vi.mock('../utils/process.js', () => ({
+  runCommand: vi.fn(),
+  runCommandStreaming: vi.fn(),
+}));
+
+vi.mock('./workspace.js', () => ({
+  assertBazelWorkspace: vi.fn(),
+}));
+
+const mockRunCommand = vi.mocked(runCommand);
+const mockRunCommandStreaming = vi.mocked(runCommandStreaming);
+
+let tempDir: string;
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  tempDir = join(tmpdir(), `bazel-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  mkdirSync(tempDir, { recursive: true });
+  writeFileSync(join(tempDir, 'WORKSPACE'), '');
+  setWorkspace(tempDir);
+});
+
+afterEach(() => {
+  if (existsSync(tempDir)) {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+const mockSuccess: CommandResult = {
+  command: 'bazel',
+  args: [],
+  exitCode: 0,
+  output: '',
+  durationMs: 10,
+  truncated: false,
+};
 
 describe('Bazel argument helpers', () => {
   it('accepts normal Bazel labels and package patterns', () => {
@@ -356,7 +401,7 @@ workspacePath: /path
 });
 
 describe('activateProfile', () => {
-  it('activates a valid profile and merges defaults', () => {
+  it('parses profile configuration', () => {
     setWorkspace('/tmp/test-workspace');
     clearDefaults();
 
@@ -387,5 +432,120 @@ describe('setEnabledWorkflows / getEnabledWorkflows', () => {
     setEnabledWorkflows(['build']);
     setEnabledWorkflows(undefined);
     expect(getEnabledWorkflows()).toBeUndefined();
+  });
+});
+
+describe('getLastCommand', () => {
+  it('returns null when no command has been run', () => {
+    expect(getLastCommand()).toBeNull();
+  });
+
+  it('returns the last command result after runBazel', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: 'build output' });
+    await runBazel(['build', '//:MyApp']);
+    const last = getLastCommand();
+    expect(last).not.toBeNull();
+    expect(last!.output).toBe('build output');
+  });
+});
+
+describe('runBazel', () => {
+  it('calls runCommand with bazel and workspace path', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await runBazel(['build', '//:MyApp']);
+
+    expect(mockRunCommand).toHaveBeenCalledWith('bazel', ['build', '//:MyApp'], {
+      cwd: tempDir,
+      timeoutSeconds: undefined,
+      maxOutput: expect.any(Number),
+    });
+  });
+
+  it('passes startup args', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await runBazel(['build', '//:MyApp'], undefined, ['--host_jvm_args=-Xmx4g']);
+
+    expect(mockRunCommand).toHaveBeenCalledWith('bazel', ['--host_jvm_args=-Xmx4g', 'build', '//:MyApp'], expect.any(Object));
+  });
+
+  it('passes timeout', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await runBazel(['build', '//:MyApp'], 300);
+
+    expect(mockRunCommand).toHaveBeenCalledWith('bazel', ['build', '//:MyApp'], expect.objectContaining({ timeoutSeconds: 300 }));
+  });
+
+  it('respects BAZEL_IOS_STARTUP_ARGS env var', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+    process.env.BAZEL_IOS_STARTUP_ARGS = '--batch --noautodetect_server_javabase';
+
+    await runBazel(['build', '//:MyApp']);
+
+    expect(mockRunCommand).toHaveBeenCalledWith('bazel', ['--batch', '--noautodetect_server_javabase', 'build', '//:MyApp'], expect.any(Object));
+
+    delete process.env.BAZEL_IOS_STARTUP_ARGS;
+  });
+
+  it('stores result in lastCommand', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: 'built successfully' });
+
+    await runBazel(['build', '//:MyApp']);
+
+    const last = getLastCommand();
+    expect(last).not.toBeNull();
+    expect(last!.output).toBe('built successfully');
+  });
+});
+
+describe('runBazelStreaming', () => {
+  it('calls runCommandStreaming and yields chunks', async () => {
+    mockRunCommandStreaming.mockImplementation(async function* () {
+      yield { stream: 'stdout' as const, data: 'Building...' };
+      yield mockSuccess;
+    });
+
+    const chunks = [];
+    for await (const chunk of runBazelStreaming(['build', '//:MyApp'])) {
+      chunks.push(chunk);
+    }
+
+    expect(mockRunCommandStreaming).toHaveBeenCalledWith('bazel', ['build', '//:MyApp'], {
+      cwd: tempDir,
+      timeoutSeconds: undefined,
+      maxOutput: expect.any(Number),
+    });
+    expect(chunks).toHaveLength(2);
+  });
+
+  it('passes startup args', async () => {
+    mockRunCommandStreaming.mockImplementation(async function* () {
+      yield mockSuccess;
+    });
+
+    const chunks = [];
+    for await (const chunk of runBazelStreaming(['test', '//:Tests'], undefined, ['--batch'])) {
+      chunks.push(chunk);
+    }
+
+    expect(mockRunCommandStreaming).toHaveBeenCalledWith('bazel', ['--batch', 'test', '//:Tests'], expect.any(Object));
+  });
+
+  it('stores final result in lastCommand', async () => {
+    mockRunCommandStreaming.mockImplementation(async function* () {
+      yield { stream: 'stdout' as const, data: 'Building...' };
+      yield { ...mockSuccess, output: 'test passed' };
+    });
+
+    const chunks = [];
+    for await (const chunk of runBazelStreaming(['test', '//:Tests'])) {
+      chunks.push(chunk);
+    }
+
+    const last = getLastCommand();
+    expect(last).not.toBeNull();
+    expect(last!.output).toBe('test passed');
   });
 });

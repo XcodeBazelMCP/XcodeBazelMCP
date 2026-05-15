@@ -1,5 +1,34 @@
-import { describe, expect, it } from 'vitest';
-import { compareVersions, detectInstallMethod, getCurrentVersion, upgradeHint, type InstallMethod } from './upgrade.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { CommandResult } from '../types/index.js';
+import { runCommand } from '../utils/process.js';
+import {
+  checkForUpdate,
+  compareVersions,
+  detectInstallMethod,
+  getCurrentVersion,
+  performUpgrade,
+  upgradeHint,
+  type InstallMethod,
+} from './upgrade.js';
+
+vi.mock('../utils/process.js', () => ({
+  runCommand: vi.fn(),
+}));
+
+const mockRunCommand = vi.mocked(runCommand);
+
+const mockSuccess: CommandResult = {
+  command: 'npm',
+  args: [],
+  exitCode: 0,
+  output: '',
+  durationMs: 10,
+  truncated: false,
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe('compareVersions', () => {
   it('returns 0 for equal versions', () => {
@@ -98,5 +127,124 @@ describe('detectInstallMethod – value check', () => {
     const first = detectInstallMethod();
     const second = detectInstallMethod();
     expect(first).toBe(second);
+  });
+});
+
+describe('checkForUpdate', () => {
+  it('returns update info when newer version available', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: '2.0.0' });
+
+    const info = await checkForUpdate();
+
+    expect(mockRunCommand).toHaveBeenCalledWith('npm', ['view', 'xcodebazelmcp', 'version'], expect.any(Object));
+    expect(info.latest).toBe('2.0.0');
+    expect(info.current).toBeDefined();
+    expect(info.installMethod).toBeDefined();
+  });
+
+  it('sets updateAvailable to true when latest is newer', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: '999.0.0' });
+
+    const info = await checkForUpdate();
+
+    expect(info.updateAvailable).toBe(true);
+  });
+
+  it('sets updateAvailable to false when current is same or newer', async () => {
+    const currentVersion = getCurrentVersion();
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: currentVersion });
+
+    const info = await checkForUpdate();
+
+    expect(info.updateAvailable).toBe(false);
+  });
+
+  it('returns null for latest when npm command fails', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, exitCode: 1, output: 'error' });
+
+    const info = await checkForUpdate();
+
+    expect(info.latest).toBeNull();
+    expect(info.updateAvailable).toBe(false);
+  });
+
+  it('returns null for latest when npm returns empty output', async () => {
+    mockRunCommand.mockResolvedValue({ ...mockSuccess, output: '' });
+
+    const info = await checkForUpdate();
+
+    expect(info.latest).toBeNull();
+  });
+});
+
+describe('performUpgrade', () => {
+  it('runs npm install -g for npm-global', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await performUpgrade('npm-global');
+
+    expect(mockRunCommand).toHaveBeenCalledWith('npm', ['install', '-g', 'xcodebazelmcp@latest'], expect.any(Object));
+  });
+
+  it('runs npm update for npm-local', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await performUpgrade('npm-local');
+
+    expect(mockRunCommand).toHaveBeenCalledWith('npm', ['update', 'xcodebazelmcp'], expect.any(Object));
+  });
+
+  it('runs brew upgrade for homebrew', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await performUpgrade('homebrew');
+
+    expect(mockRunCommand).toHaveBeenCalledWith('brew', ['upgrade', 'xcodebazelmcp'], expect.any(Object));
+  });
+
+  it('runs git pull, npm install, npm run build for source', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await performUpgrade('source');
+
+    expect(mockRunCommand).toHaveBeenCalledTimes(3);
+    expect(mockRunCommand).toHaveBeenNthCalledWith(1, 'git', ['pull', '--rebase'], expect.any(Object));
+    expect(mockRunCommand).toHaveBeenNthCalledWith(2, 'npm', ['install'], expect.any(Object));
+    expect(mockRunCommand).toHaveBeenNthCalledWith(3, 'npm', ['run', 'build'], expect.any(Object));
+  });
+
+  it('stops on git pull failure for source install', async () => {
+    mockRunCommand.mockResolvedValueOnce({ ...mockSuccess, exitCode: 1 });
+
+    const result = await performUpgrade('source');
+
+    expect(result.exitCode).toBe(1);
+    expect(mockRunCommand).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops on npm install failure for source install', async () => {
+    mockRunCommand.mockResolvedValueOnce(mockSuccess);
+    mockRunCommand.mockResolvedValueOnce({ ...mockSuccess, exitCode: 1 });
+
+    const result = await performUpgrade('source');
+
+    expect(result.exitCode).toBe(1);
+    expect(mockRunCommand).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns error message for unknown install method', async () => {
+    const result = await performUpgrade('unknown');
+
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('Cannot determine install method');
+    expect(mockRunCommand).not.toHaveBeenCalled();
+  });
+
+  it('detects install method when not provided', async () => {
+    mockRunCommand.mockResolvedValue(mockSuccess);
+
+    await performUpgrade();
+
+    expect(mockRunCommand).toHaveBeenCalled();
   });
 });
