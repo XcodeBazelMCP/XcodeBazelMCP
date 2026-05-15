@@ -1,0 +1,90 @@
+name: Feature Request
+description: Propose a new workflow, command, MCP tool, or behavior change.
+title: "[Feature] - "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for new capabilities or changes to existing behavior. For broken behavior, open a bug report instead.
+
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Workflow area
+      description: Pick the closest workflow area.
+      options:
+        - MCP server/tools
+        - CLI commands or parsers
+        - Bazel build/test/discovery
+        - Simulator workflows
+        - Physical device workflows
+        - UI automation, screenshots, video, logs, or deep links
+        - LLDB debugging
+        - macOS, tvOS, watchOS, or visionOS workflows
+        - Swift Package Manager
+        - Daemon, session defaults, config, doctor, or setup
+        - Project scaffolding
+        - CI, release, packaging, or dependencies
+        - Docs, examples, or agent skills
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that XcodeBazelMCP does not support well today?
+      placeholder: I want to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the command, MCP tool, workflow, output, or API shape you want.
+      placeholder: Add a tool/command that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example usage
+      description: Show what the UX should look like when possible.
+      render: sh
+      placeholder: xcodebazelmcp ...
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Compatibility impact
+      description: Check anything this proposal would likely affect.
+      options:
+        - label: Adds, removes, or renames MCP tools
+        - label: Changes CLI flags, command output, exit codes, or streaming behavior
+        - label: Changes config files, environment variables, defaults, or profiles
+        - label: Changes generated project scaffolding
+        - label: Changes package contents, dependencies, Node support, or release behavior
+        - label: Requires updates to docs, README, manifests, schemas, or skills
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment or target context
+      description: Include details that make the request easier to evaluate.
+      value: |
+        - Platform: simulator / device / macOS / tvOS / watchOS / visionOS / SwiftPM
+        - Bazel target shape:
+        - Xcode or Apple platform version:
+        - MCP client:
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workaround or design have you considered?
+

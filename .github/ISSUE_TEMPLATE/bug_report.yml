@@ -1,0 +1,107 @@
+name: Bug Report
+description: Report a reproducible problem with XcodeBazelMCP.
+title: "[Bug] - "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Include enough detail for someone to reproduce it in a Bazel Apple workspace.
+
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Affected workflow
+      description: Pick the closest workflow area.
+      options:
+        - MCP server/tools
+        - CLI commands or parsers
+        - Bazel build/test/discovery
+        - Simulator workflows
+        - Physical device workflows
+        - UI automation, screenshots, video, logs, or deep links
+        - LLDB debugging
+        - macOS, tvOS, watchOS, or visionOS workflows
+        - Swift Package Manager
+        - Daemon, session defaults, config, doctor, or setup
+        - Project scaffolding
+        - CI, release, packaging, or dependencies
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or MCP tool
+      description: Paste the exact CLI command, MCP tool call, or client action that fails.
+      render: sh
+      placeholder: xcodebazelmcp build //app:app --simulator
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: List the smallest set of steps needed to trigger the problem.
+      placeholder: |
+        1. Configure workspace with ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include error output, stack traces, or logs.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the versions and setup details relevant to the failure.
+      value: |
+        - XcodeBazelMCP version:
+        - Install method: npm / npx / source
+        - macOS version:
+        - Xcode version:
+        - Node.js version:
+        - Bazel or Bazelisk version:
+        - MCP client:
+        - Workspace config: env var / config file / CLI flag / runtime tool
+    validations:
+      required: true
+
+  - type: textarea
+    id: target
+    attributes:
+      label: Target, platform, and device details
+      description: Fill in whatever applies to this issue.
+      value: |
+        - Bazel target:
+        - Platform: simulator / device / macOS / tvOS / watchOS / visionOS / SwiftPM
+        - Simulator name and runtime:
+        - Physical device model and iOS version:
+        - Bundle identifier:
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add links, screenshots, recordings, sample targets, or related issues.
+

@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/XcodeBazelMCP/XcodeBazelMCP/tree/main/docs
+    about: Check workflow-specific docs before opening an issue.
+  - name: README
+    url: https://github.com/XcodeBazelMCP/XcodeBazelMCP#readme
+    about: Review installation, MCP setup, workspace configuration, and CLI examples.
+
