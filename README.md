@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/XcodeBazelMCP/XcodeBuildMCP/blob/HEAD/assets/LOGO.png?raw=true" alt="XcodeBazelMCP" width="200">
+  <img src="https://github.com/XcodeBazelMCP/XcodeBazelMCP/blob/HEAD/assets/LOGO.png?raw=true" alt="XcodeBazelMCP" width="200">
 
   <h1>XcodeBazelMCP</h1>
 
@@ -9,16 +9,16 @@
     visionOS, and Swift Package Manager.
   </p>
 
-  [![CI](https://github.com/XcodeBazelMCP/XcodeBuildMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/XcodeBazelMCP/XcodeBuildMCP/actions/workflows/ci.yml)
+  [![CI](https://github.com/XcodeBazelMCP/XcodeBazelMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/XcodeBazelMCP/XcodeBazelMCP/actions/workflows/ci.yml)
   [![npm package](https://img.shields.io/npm/v/xcodebazelmcp)](https://www.npmjs.com/package/xcodebazelmcp)
-  [![License MIT](https://img.shields.io/npm/l/xcodebazelmcp)](https://github.com/XcodeBazelMCP/XcodeBuildMCP/blob/main/LICENSE)
+  [![License MIT](https://img.shields.io/npm/l/xcodebazelmcp)](https://github.com/XcodeBazelMCP/XcodeBazelMCP/blob/main/LICENSE)
   [![node >=18.x](https://img.shields.io/node/v/xcodebazelmcp)](https://nodejs.org/)
   [![Xcode 16](https://img.shields.io/badge/Xcode-16-blue)](https://developer.apple.com/xcode/)
-  [![platform macOS](https://img.shields.io/badge/platform-macOS-lightgrey)](https://github.com/XcodeBazelMCP/XcodeBuildMCP)
+  [![platform macOS](https://img.shields.io/badge/platform-macOS-lightgrey)](https://github.com/XcodeBazelMCP/XcodeBazelMCP)
   [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green)](https://modelcontextprotocol.io)
-  [![codecov](https://codecov.io/gh/XcodeBazelMCP/XcodeBuildMCP/branch/main/graph/badge.svg)](https://codecov.io/gh/XcodeBazelMCP/XcodeBuildMCP)
+  [![codecov](https://codecov.io/gh/XcodeBazelMCP/XcodeBazelMCP/branch/main/graph/badge.svg)](https://codecov.io/gh/XcodeBazelMCP/XcodeBazelMCP)
   [![Socket Badge](https://badge.socket.dev/npm/package/xcodebazelmcp/0.1.0)](https://badge.socket.dev/npm/package/xcodebazelmcp/0.1.0)
-  [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTEgMTVoLTJ2LTJoMnYyem0wLTRoLTJWN2gydjZ6IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==)](https://deepwiki.com/XcodeBazelMCP/XcodeBuildMCP)
+  [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTEgMTVoLTJ2LTJoMnYyem0wLTRoLTJWN2gydjZ6IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==)](https://deepwiki.com/XcodeBazelMCP/XcodeBazelMCP)
 </div>
 
 <br>
@@ -101,8 +101,8 @@ npx -y xcodebazelmcp mcp --workspace /path/to/your/ios-workspace
 ### From source
 
 ```sh
-git clone https://github.com/XcodeBazelMCP/XcodeBuildMCP.git
-cd XcodeBuildMCP
+git clone https://github.com/XcodeBazelMCP/XcodeBazelMCP.git
+cd XcodeBazelMCP
 npm install
 npm run build
 ```
@@ -211,8 +211,8 @@ See [docs/device-support.md](docs/device-support.md) for full details.
 ## Development
 
 ```sh
-git clone https://github.com/XcodeBazelMCP/XcodeBuildMCP.git
-cd XcodeBuildMCP
+git clone https://github.com/XcodeBazelMCP/XcodeBazelMCP.git
+cd XcodeBazelMCP
 npm install
 npm run build     # Build dist/
 npm test          # Run tests (vitest)
