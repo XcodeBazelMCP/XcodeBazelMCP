@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CommandResult, StreamChunk } from '../types/index.js';
-import { runCommand, runCommandStreaming } from '../utils/process.js';
+import type { CommandResult } from '../types/index.js';
+import { runCommand, runCommandStreaming, type StreamChunk } from '../utils/process.js';
 import {
   assertSwiftPackage,
   detectSwiftPackage,
