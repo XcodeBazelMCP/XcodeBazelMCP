@@ -4,8 +4,8 @@
   "description": "A Model Context Protocol server and CLI for Bazel-based iOS build and test workflows.",
   "type": "module",
   "bin": {
-    "xcodebazelmcp": "./dist/cli.js",
-    "xcodebazelmcp-doctor": "./dist/doctor-cli.js"
+    "xcodebazelmcp": "dist/cli.js",
+    "xcodebazelmcp-doctor": "dist/doctor-cli.js"
   },
   "files": [
     "dist",
