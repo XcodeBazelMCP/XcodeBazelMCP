@@ -1,5 +1,4 @@
 import { beforeEach, describe, it, expect, afterEach, vi } from 'vitest';
-import { runCommand } from '../utils/process.js';
 import {
   stringOrUndefined,
   numberOrUndefined,
@@ -8,20 +7,13 @@ import {
   nextLogCaptureId,
   nextVideoRecordingId,
   resolveSimulatorFromArgs,
-  logCaptureCounter,
-  videoRecordingCounter,
 } from './helpers.js';
 import { clearDefaults, setDefaults } from '../runtime/config.js';
-
-vi.mock('../utils/process.js', () => ({
-  runCommand: vi.fn(),
-}));
 
 vi.mock('../core/simulators.js', () => ({
   resolveSimulator: vi.fn(),
 }));
 
-const mockRunCommand = vi.mocked(runCommand);
 const { resolveSimulator } = await import('../core/simulators.js');
 const mockResolveSimulator = vi.mocked(resolveSimulator);
 

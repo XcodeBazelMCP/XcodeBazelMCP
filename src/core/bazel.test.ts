@@ -539,8 +539,9 @@ describe('runBazelStreaming', () => {
       yield { ...mockSuccess, output: 'test passed' };
     });
 
-    for await (const _chunk of runBazelStreaming(['test', '//:Tests'])) {
-      // consume stream
+    const chunks = [];
+    for await (const chunk of runBazelStreaming(['test', '//:Tests'])) {
+      chunks.push(chunk);
     }
 
     const last = getLastCommand();
