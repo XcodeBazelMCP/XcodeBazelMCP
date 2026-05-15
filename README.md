@@ -54,8 +54,28 @@
 
 ## Installation
 
+### npm
+
 ```sh
 npm install -g xcodebazelmcp
+```
+
+Then use the installed CLI:
+
+```sh
+xcodebazelmcp mcp
+```
+
+### Homebrew
+
+```sh
+brew install XcodeBazelMCP/tap/xcodebazelmcp
+```
+
+Then use the installed CLI:
+
+```sh
+xcodebazelmcp mcp
 ```
 
 Or run directly via npx (no install needed):
@@ -84,6 +104,22 @@ npx -y xcodebazelmcp init
     "XcodeBazelMCP": {
       "command": "npx",
       "args": ["-y", "xcodebazelmcp", "mcp"],
+      "env": {
+        "BAZEL_IOS_WORKSPACE": "/path/to/your/ios-workspace"
+      }
+    }
+  }
+}
+```
+
+If you installed the CLI globally with npm or Homebrew:
+
+```json
+{
+  "mcpServers": {
+    "XcodeBazelMCP": {
+      "command": "xcodebazelmcp",
+      "args": ["mcp"],
       "env": {
         "BAZEL_IOS_WORKSPACE": "/path/to/your/ios-workspace"
       }
