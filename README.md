@@ -41,23 +41,28 @@
 - For screenshots: `sudo pymobiledevice3 remote tunneld` running in background
 - For logs: pymobiledevice3 is tried first automatically, falls back to `idevicesyslog`
 
-## Setup
+## Installation
 
 ```sh
-npm install
-npm run build
+npm install -g xcodebazelmcp
+```
+
+Or run directly via npx (no install needed):
+
+```sh
+npx -y xcodebazelmcp mcp
 ```
 
 ### Quick start (interactive)
 
 ```sh
-xcodebazelmcp setup
+npx -y xcodebazelmcp setup
 ```
 
 ### Install agent skills (Cursor / Codex)
 
 ```sh
-xcodebazelmcp init
+npx -y xcodebazelmcp init
 ```
 
 ## MCP Configuration
@@ -66,8 +71,8 @@ xcodebazelmcp init
 {
   "mcpServers": {
     "XcodeBazelMCP": {
-      "command": "node",
-      "args": ["/path/to/XcodeBazelMCP/dist/cli.js", "mcp"],
+      "command": "npx",
+      "args": ["-y", "xcodebazelmcp", "mcp"],
       "env": {
         "BAZEL_IOS_WORKSPACE": "/path/to/your/ios-workspace"
       }
@@ -79,7 +84,16 @@ xcodebazelmcp init
 Or with workspace flag:
 
 ```sh
-xcodebazelmcp mcp --workspace /path/to/your/ios-workspace
+npx -y xcodebazelmcp mcp --workspace /path/to/your/ios-workspace
+```
+
+### From source
+
+```sh
+git clone https://github.com/XcodeBazelMCP/XcodeBuildMCP.git
+cd XcodeBuildMCP
+npm install
+npm run build
 ```
 
 ## Working with Workspaces
@@ -186,6 +200,9 @@ See [docs/device-support.md](docs/device-support.md) for full details.
 ## Development
 
 ```sh
+git clone https://github.com/XcodeBazelMCP/XcodeBuildMCP.git
+cd XcodeBuildMCP
+npm install
 npm run build     # Build dist/
 npm test          # Run tests (vitest)
 npm run lint      # ESLint

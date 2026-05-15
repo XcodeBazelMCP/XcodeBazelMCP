@@ -38,8 +38,16 @@
     "xcode",
     "sourcekit-bazel-bsp"
   ],
+  "author": "Matheus Gois",
   "license": "MIT",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XcodeBazelMCP/XcodeBuildMCP.git"
+  },
+  "homepage": "https://github.com/XcodeBazelMCP/XcodeBuildMCP#readme",
+  "bugs": {
+    "url": "https://github.com/XcodeBazelMCP/XcodeBuildMCP/issues"
+  },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/node": "^20.19.0",
