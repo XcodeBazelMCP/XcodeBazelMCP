@@ -1,10 +1,16 @@
-<p align="center">
+<div align="center">
   <img src="assets/LOGO.png" alt="XcodeBazelMCP" width="200">
-</p>
 
-# XcodeBazelMCP
+  <h1>XcodeBazelMCP</h1>
 
-A Model Context Protocol (MCP) server and CLI for Bazel-based Apple platform development. Ships 112 tools across 19 workflow categories covering iOS, macOS, tvOS, watchOS, visionOS, and Swift Package Manager.
+  <p>
+    A Model Context Protocol (MCP) server and CLI for Bazel-based Apple platform development.
+    Ships 112 tools across 19 workflow categories covering iOS, macOS, tvOS, watchOS,
+    visionOS, and Swift Package Manager.
+  </p>
+</div>
+
+<br>
 
 ## What It Provides
 
