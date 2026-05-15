@@ -1,4 +1,4 @@
-export interface WorkflowInfo {
+interface WorkflowInfo {
   id: string;
   name: string;
   description: string;

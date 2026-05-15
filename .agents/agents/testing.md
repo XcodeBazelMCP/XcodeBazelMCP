@@ -28,4 +28,3 @@
 
 - Global mutable `config` + `configLoaded` in `runtime/config.ts` leaks state across test files. No current tests call `runBazel` or `assertBazelWorkspace` so it doesn't cause failures — watch out when adding integration tests.
 - Module-level mutable counters (`logCaptureCounter`, `videoRecordingCounter`) in `helpers.ts` have no reset function. Tests share state across runs.
-- `vitest.smoke.config.ts` and `vitest.snapshot.config.ts` are unused — smoke tests already run via default config, and no `*.snapshot.test.ts` files exist.

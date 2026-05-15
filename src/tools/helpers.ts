@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { resolveSimulator, type SimulatorDevice } from '../core/simulators.js';
 import { getDefaults } from '../runtime/config.js';
-import type { JsonObject, ToolCallResult, ToolDefinition } from '../types/index.js';
+import type { JsonObject } from '../types/index.js';
 
 export const logCaptures = new Map<string, { child: ReturnType<typeof spawn>; output: string; simulatorId: string }>();
 export let logCaptureCounter = 0;
@@ -45,9 +45,3 @@ export function numberOrUndefined(value: unknown): number | undefined {
   return typeof value === 'number' ? value : undefined;
 }
 
-export type ToolHandler = (name: string, args: JsonObject) => Promise<ToolCallResult> | ToolCallResult | undefined;
-
-export interface HandlerModule {
-  definitions: ToolDefinition[];
-  handle: ToolHandler;
-}

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { bazelToolDefinitions, callBazelTool } from './bazel-tools.js';
 import { clearDefaults, setDefaults, setEnabledWorkflows } from '../runtime/config.js';
+import { extractText } from '../cli/commands.js';
 
 describe('Bazel MCP tool definitions', () => {
   it('registers every public Bazel iOS tool exactly once', () => {
@@ -481,13 +482,6 @@ describe('Set defaults tool', () => {
     expect(text).toMatch(/\d+\.\d+\.\d+/);
   });
 });
-
-function extractText(result: { content: Array<{ type: string; text?: string }> }) {
-  return result.content
-    .filter((c): c is { type: 'text'; text: string } => c.type === 'text')
-    .map((c) => c.text)
-    .join('\n');
-}
 
 function findTool(name: string) {
   const tool = bazelToolDefinitions.find((definition) => definition.name === name);

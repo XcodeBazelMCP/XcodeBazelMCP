@@ -157,10 +157,6 @@ export function setEnabledWorkflows(workflows: string[] | undefined): void {
   config = { ...config, enabledWorkflows: workflows };
 }
 
-export function parseSimpleYaml(content: string): FileConfig {
-  return parseConfigYaml(content);
-}
-
 export function parseConfigYaml(content: string): FileConfig {
   const result: Record<string, unknown> = {};
   const profiles: Record<string, ProfileConfig> = {};

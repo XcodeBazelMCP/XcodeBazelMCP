@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import type { CommandResult } from '../types/index.js';
 import { runCommand, runCommandStreaming, type StreamChunk } from '../utils/process.js';
 
-export interface SwiftPackageInfo {
+interface SwiftPackageInfo {
   packagePath: string;
   hasPackageSwift: boolean;
   hasPackageResolved: boolean;

@@ -1,6 +1,6 @@
 import type { BuildAndRunArgs, BuildArgs, JsonObject, TestArgs } from '../types/index.js';
 
-export function append(value: unknown, next: string): string[] {
+function append(value: unknown, next: string): string[] {
   return [...(Array.isArray(value) ? (value as string[]) : []), next];
 }
 

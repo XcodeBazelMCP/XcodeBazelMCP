@@ -1,4 +1,0 @@
-{
-  "entry": ["src/cli.ts", "src/doctor-cli.ts"],
-  "project": ["src/**/*.ts"]
-}

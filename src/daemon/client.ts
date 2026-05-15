@@ -6,7 +6,6 @@ import {
   readDaemonPidFile,
   socketPathForWorkspace,
   type DaemonInfo,
-  type DaemonOpInfo,
   type DaemonRequest,
   type DaemonResponse,
 } from './index.js';
@@ -69,28 +68,6 @@ export async function daemonStatus(workspacePath: string): Promise<DaemonInfo | 
   }
 }
 
-export async function daemonPing(workspacePath: string): Promise<boolean> {
-  if (!isDaemonRunning(workspacePath)) return false;
-  try {
-    const resp = await sendRequest(
-      socketPathForWorkspace(workspacePath),
-      { method: 'ping' },
-      2_000,
-    );
-    return resp.ok;
-  } catch {
-    return false;
-  }
-}
-
-export async function daemonListOps(workspacePath: string): Promise<DaemonOpInfo[]> {
-  const resp = await sendRequest(
-    socketPathForWorkspace(workspacePath),
-    { method: 'list_ops' },
-  );
-  if (!resp.ok) throw new Error(resp.error || 'Failed to list ops');
-  return resp.data as DaemonOpInfo[];
-}
 
 export async function daemonShutdown(workspacePath: string): Promise<void> {
   if (!isDaemonRunning(workspacePath)) return;
@@ -108,7 +85,7 @@ export async function daemonShutdown(workspacePath: string): Promise<void> {
   }
 }
 
-export function spawnDaemon(workspacePath: string): { pid: number } {
+function spawnDaemon(workspacePath: string): { pid: number } {
   if (isDaemonRunning(workspacePath)) {
     const info = readDaemonPidFile(workspacePath);
     if (info) return { pid: info.pid };

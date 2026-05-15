@@ -4,7 +4,7 @@ import type { CommandResult } from '../types/index.js';
 import { runCommand } from '../utils/process.js';
 import { readBundleId } from './simulators.js';
 
-export interface PhysicalDevice {
+interface PhysicalDevice {
   udid: string;
   name: string;
   state: 'connected' | 'disconnected' | 'unavailable';
@@ -315,7 +315,7 @@ export async function screenshotDevice(
   return result;
 }
 
-export interface DeviceLogCapture {
+interface DeviceLogCapture {
   child: ChildProcess;
   getCaptured: () => string;
   tool: 'pymobiledevice3' | 'idevicesyslog';

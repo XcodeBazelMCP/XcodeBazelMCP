@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { CommandResult } from '../types/index.js';
 import { runCommand } from '../utils/process.js';
 
-export interface VersionInfo {
+interface VersionInfo {
   current: string;
   latest: string | null;
   updateAvailable: boolean;
@@ -38,7 +38,7 @@ export function getCurrentVersion(): string {
   return '0.0.0';
 }
 
-export async function fetchLatestVersion(): Promise<string | null> {
+async function fetchLatestVersion(): Promise<string | null> {
   try {
     const result = await runCommand('npm', ['view', 'xcodebazelmcp', 'version'], {
       cwd: process.cwd(),

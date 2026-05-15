@@ -47,7 +47,7 @@ export async function listSimulators(onlyBooted = false): Promise<{
   return { command, devices };
 }
 
-export interface ResolvedSimulator {
+interface ResolvedSimulator {
   device: SimulatorDevice;
   warning?: string;
 }

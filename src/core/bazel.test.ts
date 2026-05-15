@@ -11,7 +11,6 @@ import {
   simulatorArgs,
 } from './bazel.js';
 import {
-  parseSimpleYaml,
   parseConfigYaml,
   activateProfile,
   setEnabledWorkflows,
@@ -166,7 +165,7 @@ describe('Bazel argument helpers', () => {
 
 describe('Config file parser', () => {
   it('parses simple key-value YAML', () => {
-    const config = parseSimpleYaml(`
+    const config = parseConfigYaml(`
 workspacePath: /path/to/workspace
 bazelPath: /opt/homebrew/bin/bazel
 defaultSimulatorName: iPhone 16 Pro
@@ -179,7 +178,7 @@ maxOutput: 500000
   });
 
   it('ignores comments and blank lines', () => {
-    const config = parseSimpleYaml(`
+    const config = parseConfigYaml(`
 # This is a comment
 workspacePath: /path
 
@@ -191,13 +190,13 @@ bazelPath: bazel
   });
 
   it('handles boolean values', () => {
-    const config = parseSimpleYaml(`someFlag: true\nanotherFlag: false`);
+    const config = parseConfigYaml(`someFlag: true\nanotherFlag: false`);
     expect((config as Record<string, unknown>).someFlag).toBe(true);
     expect((config as Record<string, unknown>).anotherFlag).toBe(false);
   });
 
   it('handles decimal number values', () => {
-    const config = parseSimpleYaml(`maxOutput: 200000\ntimeout: 1.5`);
+    const config = parseConfigYaml(`maxOutput: 200000\ntimeout: 1.5`);
     expect(config.maxOutput).toBe(200000);
     expect((config as Record<string, unknown>).timeout).toBe(1.5);
   });
@@ -231,7 +230,7 @@ profiles:
   });
 
   it('preserves colons inside values', () => {
-    const config = parseSimpleYaml(`bazelPath: /usr/local/bin:bazel\nworkspacePath: C:\\Users\\foo`);
+    const config = parseConfigYaml(`bazelPath: /usr/local/bin:bazel\nworkspacePath: C:\\Users\\foo`);
     expect(config.bazelPath).toBe('/usr/local/bin:bazel');
   });
 

@@ -29,5 +29,3 @@ export async function callBazelTool(name: string, args: JsonObject = {}): Promis
   }
   throw new Error(`Unknown tool: ${name}`);
 }
-
-export { callBazelToolStreaming } from './streaming.js';

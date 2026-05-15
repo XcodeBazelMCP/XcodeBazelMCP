@@ -27,7 +27,7 @@ import { formatCommandResult, structuredCommandResult, toolResult, toolText } fr
 import { applyDefaults, numberOrUndefined, prependWarning, stringOrUndefined } from './helpers.js';
 import { callBazelTool } from './bazel-tools.js';
 
-export const STREAMING_TOOLS = new Set([
+const STREAMING_TOOLS = new Set([
   'bazel_ios_build',
   'bazel_ios_build_and_run',
   'bazel_ios_device_build_and_run',
