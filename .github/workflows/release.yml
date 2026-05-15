@@ -116,3 +116,47 @@ jobs:
         with:
           tag_name: ${{ needs.create-tag.outputs.version && format('v{0}', needs.create-tag.outputs.version) || github.ref_name }}
           generate_release_notes: true
+
+  update-homebrew:
+    name: Update Homebrew formula
+    needs: [publish, create-tag]
+    if: always() && needs.publish.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: ver
+        run: |
+          VERSION="${{ needs.create-tag.outputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Download tarball and compute sha256
+        id: sha
+        run: |
+          URL="https://registry.npmjs.org/xcodebazelmcp/-/xcodebazelmcp-${{ steps.ver.outputs.version }}.tgz"
+          for i in 1 2 3 4 5; do
+            SHA=$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')
+            [ -n "$SHA" ] && break
+            sleep 10
+          done
+          echo "sha256=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v5
+        with:
+          repository: XcodeBazelMCP/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Update formula
+        run: |
+          sed -i 's|url ".*"|url "https://registry.npmjs.org/xcodebazelmcp/-/xcodebazelmcp-${{ steps.ver.outputs.version }}.tgz"|' Formula/xcodebazelmcp.rb
+          sed -i 's|sha256 ".*"|sha256 "${{ steps.sha.outputs.sha256 }}"|' Formula/xcodebazelmcp.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/xcodebazelmcp.rb
+          git commit -m "Update xcodebazelmcp to ${{ steps.ver.outputs.version }}"
+          git push
