@@ -4,6 +4,17 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
@@ -30,12 +41,49 @@ jobs:
       - name: Test
         run: npx vitest --run
 
+  create-tag:
+    name: Bump & Tag
+    needs: ci
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and tag
+        id: bump
+        run: |
+          npm version ${{ inputs.bump }} --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v${VERSION}"
+          git tag "v${VERSION}"
+          git push
+          git push --tags
+
   publish:
     name: Publish to npm
-    needs: ci
+    needs: [ci, create-tag]
+    if: always() && needs.ci.result == 'success' && (needs.create-tag.result == 'success' || needs.create-tag.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.create-tag.outputs.version && format('v{0}', needs.create-tag.outputs.version) || github.ref }}
 
       - uses: actions/setup-node@v6
         with:
@@ -54,7 +102,8 @@ jobs:
 
   github-release:
     name: GitHub Release
-    needs: publish
+    needs: [publish, create-tag]
+    if: always() && needs.publish.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -62,4 +111,5 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.create-tag.outputs.version && format('v{0}', needs.create-tag.outputs.version) || github.ref_name }}
           generate_release_notes: true
