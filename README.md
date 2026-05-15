@@ -8,6 +8,10 @@
     Ships 112 tools across 19 workflow categories covering iOS, macOS, tvOS, watchOS,
     visionOS, and Swift Package Manager.
   </p>
+
+  [![CI](https://github.com/XcodeBazelMCP/XcodeBuildMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/XcodeBazelMCP/XcodeBuildMCP/actions/workflows/ci.yml)
+  [![codecov](https://codecov.io/gh/XcodeBazelMCP/XcodeBuildMCP/branch/main/graph/badge.svg)](https://codecov.io/gh/XcodeBazelMCP/XcodeBuildMCP)
+  [![Socket Badge](https://badge.socket.dev/npm/package/xcodebazelmcp/0.1.0)](https://badge.socket.dev/npm/package/xcodebazelmcp/0.1.0)
 </div>
 
 <br>
