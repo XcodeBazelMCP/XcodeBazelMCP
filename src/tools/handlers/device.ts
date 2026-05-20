@@ -5,6 +5,7 @@ import {
   configArgs,
   requireLabel,
   runBazel,
+  testFilterArgs,
 } from '../../core/bazel.js';
 import {
   deviceInfo,
@@ -125,7 +126,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         deviceId: { type: 'string', description: 'Device UDID.' },
         deviceName: { type: 'string', description: 'Device name.' },
         configs: { type: 'array', items: { type: 'string' } },
@@ -374,7 +375,7 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         ...configArgs(args.configs),
         ...asStringArray(args.extraArgs, 'extraArgs'),
       ];
-      if (args.testFilter) testArgs.push(`--test_filter=${args.testFilter}`);
+      testArgs.push(...testFilterArgs(args.testFilter));
       testArgs.push(`--test_arg=--destination`, `--test_arg=id=${device.udid}`);
       testArgs.push(target);
       const result = await runBazel(

@@ -1,6 +1,6 @@
 import type { JsonObject, ToolCallResult, ToolDefinition, BuildArgs, TestArgs, TargetKind, BuildMode } from '../../types/index.js';
 import { stringOrUndefined, numberOrUndefined } from '../helpers.js';
-import { buildCommandArgs, configArgs, discoverExpression, modeArgs, requireLabel, runBazel, asStringArray } from '../../core/bazel.js';
+import { buildCommandArgs, configArgs, discoverExpression, modeArgs, requireLabel, runBazel, asStringArray, testFilterArgs } from '../../core/bazel.js';
 import { findAppBundle, readBundleId } from '../../core/simulators.js';
 import { formatCommandResult, structuredCommandResult, toolResult, toolText } from '../../utils/output.js';
 import { runCommand } from '../../utils/process.js';
@@ -49,7 +49,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         configs: { type: 'array', items: { type: 'string' } },
         startupArgs: { type: 'array', items: { type: 'string' } },
         extraArgs: { type: 'array', items: { type: 'string' } },
@@ -79,7 +79,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         configs: { type: 'array', items: { type: 'string' } },
         startupArgs: { type: 'array', items: { type: 'string' } },
         extraArgs: { type: 'array', items: { type: 'string' } },
@@ -236,10 +236,8 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         '--test_output=errors',
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       const commandResult = await runBazel(
         bazelArgs,
@@ -269,7 +267,7 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         ...configArgs(asStringArray(args.configs, 'configs')),
         ...asStringArray(args.extraArgs, 'extraArgs'),
       ];
-      if (args.testFilter) coverageArgs.push(`--test_filter=${args.testFilter}`);
+      coverageArgs.push(...testFilterArgs(args.testFilter));
       coverageArgs.push(target);
       const result = await runBazel(
         coverageArgs,
