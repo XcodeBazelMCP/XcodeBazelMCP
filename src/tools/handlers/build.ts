@@ -9,6 +9,7 @@ import {
   runBazel,
   sanitizeQueryExpression,
   simulatorArgs,
+  testFilterArgs,
 } from '../../core/bazel.js';
 import {
   bootSimulatorIfNeeded,
@@ -136,7 +137,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         simulatorName: { type: 'string' },
         simulatorVersion: { type: 'string' },
         configs: { type: 'array', items: { type: 'string' } },
@@ -251,7 +252,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         simulatorName: { type: 'string' },
         simulatorVersion: { type: 'string' },
         configs: { type: 'array', items: { type: 'string' } },
@@ -365,10 +366,8 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         ...simulatorArgs(testArgs),
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       const commandResult = await runBazel(
         bazelArgs,
@@ -460,10 +459,8 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         ...simulatorArgs(testArgs),
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       const commandResult = await runBazel(
         bazelArgs,

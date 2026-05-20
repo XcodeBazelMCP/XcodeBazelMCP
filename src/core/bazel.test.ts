@@ -14,6 +14,7 @@ import {
   requireLabel,
   sanitizeQueryExpression,
   simulatorArgs,
+  testFilterArgs,
   runBazel,
   runBazelStreaming,
   getLastCommand,
@@ -166,6 +167,29 @@ describe('Bazel argument helpers', () => {
 
     expect(configArgs(['test', 'debug.local'])).toEqual(['--config=test', '--config=debug.local']);
     expect(() => configArgs(['bad;config'])).toThrow('Invalid config value');
+  });
+
+  it('testFilterArgs returns single --test_filter for simple string', () => {
+    expect(testFilterArgs('MyTestSuite')).toEqual(['--test_filter=MyTestSuite']);
+  });
+
+  it('testFilterArgs joins pipe-separated values with commas for rules_apple', () => {
+    expect(testFilterArgs('SuiteA|SuiteB')).toEqual([
+      '--test_filter=SuiteA,SuiteB',
+    ]);
+  });
+
+  it('testFilterArgs handles whitespace around pipes', () => {
+    expect(testFilterArgs(' A | B | C ')).toEqual([
+      '--test_filter=A,B,C',
+    ]);
+  });
+
+  it('testFilterArgs returns empty array for falsy values', () => {
+    expect(testFilterArgs(undefined)).toEqual([]);
+    expect(testFilterArgs('')).toEqual([]);
+    expect(testFilterArgs('  ')).toEqual([]);
+    expect(testFilterArgs(null)).toEqual([]);
   });
 
   it('builds a simulator build command with stable flag ordering', () => {

@@ -18,6 +18,7 @@ import {
   runBazelStreaming,
   sanitizeQueryExpression,
   simulatorArgs,
+  testFilterArgs,
 } from '../core/bazel.js';
 import { bootSimulatorIfNeeded, findAppBundle, installApp, launchApp, readBundleId, resolveSimulator } from '../core/simulators.js';
 import { installAppOnDevice, launchAppOnDevice, resolveDevice } from '../core/devices.js';
@@ -166,10 +167,8 @@ function buildStreamingBazelArgs(name: string, args: JsonObject): string[] {
         ...simulatorArgs(testArgs),
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       return bazelArgs;
     }
@@ -200,10 +199,8 @@ function buildStreamingBazelArgs(name: string, args: JsonObject): string[] {
         '--ios_multi_cpus=arm64',
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       return bazelArgs;
     }
@@ -214,10 +211,8 @@ function buildStreamingBazelArgs(name: string, args: JsonObject): string[] {
         'coverage',
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       return bazelArgs;
     }
@@ -248,10 +243,8 @@ function buildStreamingBazelArgs(name: string, args: JsonObject): string[] {
         '--test_output=errors',
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       return bazelArgs;
     }
@@ -293,10 +286,8 @@ function buildStreamingBazelArgs(name: string, args: JsonObject): string[] {
         ...platformArgs(plat),
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       return bazelArgs;
     }

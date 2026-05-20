@@ -90,6 +90,16 @@ export function platformArgs(platform?: BuildPlatform): string[] {
   }
 }
 
+export function testFilterArgs(testFilter: unknown): string[] {
+  if (typeof testFilter !== 'string' || !testFilter.trim()) return [];
+  const trimmed = testFilter.trim();
+  if (trimmed.includes('|')) {
+    const joined = trimmed.split('|').map(p => p.trim()).filter(Boolean).join(',');
+    return [`--test_filter=${joined}`];
+  }
+  return [`--test_filter=${trimmed}`];
+}
+
 export function configArgs(value: unknown): string[] {
   return asStringArray(value, 'configs').map((config) => {
     if (!/^[A-Za-z0-9_.-]+$/.test(config)) {

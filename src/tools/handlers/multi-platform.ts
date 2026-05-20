@@ -1,6 +1,6 @@
 import type { JsonObject, ToolCallResult, ToolDefinition, BuildArgs, TestArgs, BuildPlatform, BuildMode, TargetKind } from '../../types/index.js';
 import { stringOrUndefined, numberOrUndefined } from '../helpers.js';
-import { buildCommandArgs, configArgs, discoverExpression, modeArgs, platformArgs, requireLabel, runBazel, asStringArray } from '../../core/bazel.js';
+import { buildCommandArgs, configArgs, discoverExpression, modeArgs, platformArgs, requireLabel, runBazel, asStringArray, testFilterArgs } from '../../core/bazel.js';
 import { formatCommandResult, structuredCommandResult, toolResult, toolText } from '../../utils/output.js';
 
 export const definitions: ToolDefinition[] = [
@@ -28,7 +28,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         configs: { type: 'array', items: { type: 'string' } },
         startupArgs: { type: 'array', items: { type: 'string' } },
         extraArgs: { type: 'array', items: { type: 'string' } },
@@ -93,7 +93,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         configs: { type: 'array', items: { type: 'string' } },
         startupArgs: { type: 'array', items: { type: 'string' } },
         extraArgs: { type: 'array', items: { type: 'string' } },
@@ -158,7 +158,7 @@ export const definitions: ToolDefinition[] = [
       type: 'object',
       properties: {
         target: { type: 'string', description: 'Bazel test target label.' },
-        testFilter: { type: 'string', description: 'Optional --test_filter value.' },
+        testFilter: { type: 'string', description: 'Optional test filter. Supports pipe-separated values (e.g. "SuiteA|SuiteB") to run multiple suites.' },
         configs: { type: 'array', items: { type: 'string' } },
         startupArgs: { type: 'array', items: { type: 'string' } },
         extraArgs: { type: 'array', items: { type: 'string' } },
@@ -265,10 +265,8 @@ export async function handle(name: string, args: JsonObject): Promise<ToolCallRe
         ...platformArgs(plat),
         ...configArgs(testArgs.configs),
         ...asStringArray(testArgs.extraArgs, 'extraArgs'),
+        ...testFilterArgs(testArgs.testFilter),
       ];
-      if (typeof testArgs.testFilter === 'string' && testArgs.testFilter.trim()) {
-        bazelArgs.push(`--test_filter=${testArgs.testFilter.trim()}`);
-      }
       bazelArgs.push(target);
       const commandResult = await runBazel(
         bazelArgs,
