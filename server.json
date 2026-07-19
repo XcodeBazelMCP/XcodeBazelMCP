@@ -4,7 +4,7 @@
   "description": "MCP server and CLI for Bazel-based iOS build and test workflows.",
   "status": "active",
   "repository": {
-    "url": "https://github.com/maatheusgois-dd/XcodeBazelMCP",
+    "url": "https://github.com/DebugSwift/XcodeBazelMCP",
     "source": "github"
   },
   "version": "0.1.0",

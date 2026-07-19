@@ -42,11 +42,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XcodeBazelMCP/XcodeBazelMCP.git"
+    "url": "git+https://github.com/DebugSwift/XcodeBazelMCP.git"
   },
-  "homepage": "https://github.com/XcodeBazelMCP/XcodeBazelMCP#readme",
+  "homepage": "https://github.com/DebugSwift/XcodeBazelMCP#readme",
   "bugs": {
-    "url": "https://github.com/XcodeBazelMCP/XcodeBazelMCP/issues"
+    "url": "https://github.com/DebugSwift/XcodeBazelMCP/issues"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
